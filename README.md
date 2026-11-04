@@ -4,7 +4,9 @@ Copy here. Paste there.
 
 An early preview by A7li for sharing clipboard text, images, files, camera photos and QR text between **Windows x64 and Android 11+** over the same local network.
 
-[Website and setup](https://www.a7li.dev/apps/clipbridge/) · [Download preview 0.5.0](https://github.com/A7lI/ClipBridge/releases/tag/v0.5.0-preview)
+[Website and setup](https://www.a7li.dev/apps/clipbridge/) · [Android 0.5.1 keyboard preview](https://github.com/A7lI/ClipBridge/releases/tag/v0.5.1-keyboard) · [Windows 0.5.0 preview](https://github.com/A7lI/ClipBridge/releases/tag/v0.5.0-preview)
+
+**Android 0.5.1 upgrade:** the supplied APK uses a different signing certificate from 0.5.0. Android cannot install it over that release. Save important app-private files before uninstalling the old Android app, then install 0.5.1 and pair again. Uninstalling removes pairing settings and private app data.
 
 ## Get started
 
@@ -30,7 +32,7 @@ Transfers use an authenticated, encrypted local connection. No ClipBridge accoun
 
 ## Source and notices
 
-The release includes the complete **ClipBridge-Source-0.5.0-preview.zip**, setup guide, checksums and third-party licenses. Model weights are downloaded separately. Canary is NVIDIA’s Canary 180M Flash, converted to GGUF/Q8_0 by handy-computer, under CC BY 4.0.
+The 0.5.0 release includes the complete **ClipBridge-Source-0.5.0-preview.zip**, setup guide, checksums and third-party licenses. The Android 0.5.1 keyboard preview distributes the supplied APK and its checksum; updated 0.5.1 source was not provided. Model weights are downloaded separately. Canary is NVIDIA’s Canary 180M Flash, converted to GGUF/Q8_0 by handy-computer, under CC BY 4.0.
 
 [Model publisher](https://huggingface.co/handy-computer/canary-180m-flash-gguf) · [Original NVIDIA model](https://huggingface.co/nvidia/canary-180m-flash)
 
