@@ -1,5 +1,8 @@
 import { keyFromLink, maxText, request, validateFiles, sendFiles, receiveFiles } from './transport.mjs';
 import { showFiles, clearFiles } from './files.mjs';
+import { prepareOffline } from './offline.mjs';
+
+prepareOffline();
 
 const byId = id => document.getElementById(id);
 const storageKey = 'clipbridge.web.pairing.v1';

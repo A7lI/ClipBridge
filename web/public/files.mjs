@@ -1,5 +1,25 @@
 let receivedFiles = [];
 let urls = [];
+let nativeSaving = false;
+
+async function saveAndroid(file, copy, say) {
+  if (nativeSaving) { say('Wait for the current file to finish saving.'); return; }
+  nativeSaving = true;
+  const bridge = window.ClipBridgePhone;
+  let ticket;
+  try {
+    ticket = bridge.beginSave(file.name, file.type, file.size, copy);
+    if (!ticket) throw new Error('Could not start saving. Check free storage space.');
+    for (let offset = 0; offset < file.size; offset += 16384) {
+      const bytes = new Uint8Array(await file.slice(offset, offset + 16384).arrayBuffer());
+      if (!bridge.appendSave(ticket, btoa(String.fromCharCode(...bytes)))) throw new Error('Could not save the complete file.');
+      if (offset % (512 * 1024) === 0) { say(`Saving ${(offset / 1024 / 1024).toFixed(1)} of ${(file.size / 1024 / 1024).toFixed(1)} MB…`); await new Promise(resolve => setTimeout(resolve, 0)); }
+    }
+    if (!bridge.finishSave(ticket)) throw new Error('Could not finish saving the file.');
+    say(copy ? 'Saved in Downloads/ClipBridge and copied for pasting.' : 'Saved in Downloads/ClipBridge.');
+  } catch (error) { if (ticket) bridge.cancelSave(ticket); say(error.message, true); }
+  finally { nativeSaving = false; }
+}
 
 export function clearFiles() {
   urls.forEach(url => URL.revokeObjectURL(url));
@@ -44,11 +64,12 @@ export function showFiles(files, say) {
       image.alt = file.name;
       image.addEventListener('error', () => { image.hidden = true; }, { once: true });
       row.append(image);
-      if (navigator.clipboard?.write && window.ClipboardItem) {
+      if (window.ClipBridgePhone || (navigator.clipboard?.write && window.ClipboardItem)) {
         const copy = document.createElement('button');
         copy.className = 'secondary';
         copy.textContent = 'Copy photo';
         copy.addEventListener('click', async () => {
+          if (window.ClipBridgePhone) return saveAndroid(file, true, say);
           try {
             await navigator.clipboard.write([new ClipboardItem({ 'image/png': asPNG(file) })]);
             say('Photo copied. Paste it in an app that accepts images.');
@@ -61,6 +82,14 @@ export function showFiles(files, say) {
     save.href = url;
     save.download = file.name;
     save.textContent = 'Download file';
+    if (window.ClipBridgePhone) {
+      save.textContent = 'Save to Downloads';
+      save.addEventListener('click', event => { event.preventDefault(); saveAndroid(file, false, say); });
+      if (!isImage) {
+        const copy = document.createElement('button'); copy.textContent = 'Copy file'; copy.className = 'secondary';
+        copy.addEventListener('click', () => saveAndroid(file, true, say)); row.append(copy);
+      }
+    }
     row.append(save);
     list.append(row);
   }

@@ -78,3 +78,11 @@ progress { width: 100%; accent-color: var(--mint); margin-bottom: .6rem; }
 #status { border-color: #598b7d; color: #e6fbf1; line-height: 1.5; overflow-wrap: anywhere; }
 #status[data-error] { border-color: #c98164; color: #ffd3bf; }
 :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+select { width: 100%; background: #10191f; color: var(--fg); border: 1px solid var(--line); border-radius: 9px; font: inherit; padding: .8rem; }
+.phone-link, .text-link { color: var(--mint); display: inline-block; min-height: 44px; padding-block: .6rem; }
+#invitation { margin-top: 1rem; }
+#invitation-qr { display: block; width: min(100%, 360px); height: auto; margin: 1rem auto; border-radius: 8px; }
+#phone-camera-view { display: block; width: 100%; max-height: 50vh; border-radius: 8px; }
+#phone-offer { padding: 1rem; border: 1px solid var(--mint); border-radius: 9px; margin-top: 1rem; overflow-wrap: anywhere; }
+#phone-offer-description, #phone-selection { white-space: pre-wrap; overflow-wrap: anywhere; }
+#offline-ready { color: var(--muted); font-size: .85rem; }

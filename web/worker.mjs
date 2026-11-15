@@ -1,9 +1,17 @@
+import { mobileRoute, openMobile, relayMobile, closeMobile } from './mobile-relay.mjs';
+
 const roomRoute = /^\/signal\/([a-f0-9]{64})\/(pc|phone\/([a-f0-9]{32}))$/;
 const maxMessage = 49152;
 
 export default {
   fetch(request, env) {
     const url = new URL(request.url);
+    const mobile = mobileRoute.exec(url.pathname);
+    if (mobile) {
+      if (request.method !== 'GET' || request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return new Response('WebSocket required', { status: 426 });
+      if (request.headers.get('Origin') !== url.origin) return new Response('Origin denied', { status: 403 });
+      return env.PAIRING_ROOMS.getByName('mobile:' + mobile[1]).fetch(request);
+    }
     const match = roomRoute.exec(url.pathname);
     if (!match) return new Response('Not found', { status: 404 });
     if (request.method !== 'GET' || request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
@@ -23,6 +31,7 @@ export class PairingRoom {
   }
 
   fetch(request) {
+    if (mobileRoute.test(new URL(request.url).pathname)) return openMobile(this.context, request);
     const [, , , peer] = roomRoute.exec(new URL(request.url).pathname);
     const [client, socket] = Object.values(new WebSocketPair());
     const isPC = !peer;
@@ -37,6 +46,7 @@ export class PairingRoom {
   }
 
   webSocketMessage(socket, raw) {
+    if (socket.deserializeAttachment()?.mobile) return relayMobile(this.context, socket, raw);
     if (typeof raw !== 'string' || raw.length > maxMessage) {
       socket.close(1009, 'Invalid message size');
       return;
@@ -61,6 +71,7 @@ export class PairingRoom {
   }
 
   webSocketClose(socket) {
+    if (socket.deserializeAttachment()?.mobile) return closeMobile(this.context, socket);
     if (!socket.deserializeAttachment()?.peer) {
       for (const phone of this.context.getWebSockets('phone')) phone.close(4004, 'PC disconnected');
     }
@@ -68,5 +79,12 @@ export class PairingRoom {
 
   webSocketError(socket) {
     socket.close(1011, 'Pairing connection ended');
+  }
+
+  alarm() {
+    for (const socket of this.context.getWebSockets()) {
+      const info = socket.deserializeAttachment();
+      if (info?.mobile && Date.now() >= info.expires) socket.close(1008, 'Session expired. Pair again.');
+    }
   }
 }

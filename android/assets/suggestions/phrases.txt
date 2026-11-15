@@ -1,0 +1,168 @@
+# ClipBridge contextual phrase seeds, authored for this keyboard.
+# Earlier alternatives receive higher priority; these are phrase hints, not a language model.
+how are you doing
+how are things going
+how is your day
+how much is it
+how do I get there
+how can I help you
+what are you doing
+what do you think
+what is your name
+what time is it
+where are you now
+where is the file
+when are you coming
+when will you arrive
+why are you late
+who are you
+thank you very much
+thanks for your help
+thanks a lot
+you're welcome
+you are welcome
+you are right
+I am fine thanks
+I am on my way
+I am going home
+I am sorry
+I am ready
+I will be there
+I will send it
+I want to go
+I need your help
+I would like to
+I don't know
+I don't think so
+I can't wait
+I can help you
+I love you
+I miss you
+let me know
+let us know
+let's go home
+can you send me
+can you help me
+could you please send
+please send me the file
+please let me know
+please call me
+send me a message
+send me the photo
+see you soon
+see you tomorrow
+see you later
+talk to you later
+good morning
+good night
+good evening
+good afternoon
+have a nice day
+have a good weekend
+happy birthday to you
+take care of yourself
+no problem
+no worries
+of course
+on my way
+at the moment
+in the morning
+in the evening
+as soon as possible
+by the way
+السلام عليكم ورحمة الله وبركاته
+وعليكم السلام ورحمة الله وبركاته
+صباح الخير
+صباح النور
+مساء الخير
+مساء النور
+أهلا وسهلا
+الحمد لله
+إن شاء الله
+ما شاء الله
+بارك الله فيك
+جزاك الله خيرا
+الله يحفظك
+الله يسلمك
+الله يعطيك العافية
+شكرا جزيلا
+شكرا على المساعدة
+شكرا لك
+من فضلك
+لو سمحت
+كيف حالك اليوم
+كيف حالك أنت
+كيف كان يومك
+ما اسمك
+ما رأيك في
+ماذا تفعل الآن
+أين أنت الآن
+متى تصل إلى البيت
+هل يمكنك مساعدتي
+هل أنت بخير
+هل عندك وقت
+هل تريد الذهاب
+أنا بخير الحمد لله
+أنا في البيت
+أنا في الطريق
+أنا في العمل
+أنا أحبك
+أنا آسف
+أنا جاهز
+أنا أريد أن
+أنا لا أعرف
+أريد أن أذهب
+أحتاج إلى مساعدة
+سوف أرسل لك
+أرسل لي الصورة
+أرسل لي الملف
+أرسل لي رسالة
+اتصل بي لاحقا
+تصبح على خير
+تصبحين على خير
+مع السلامة
+إلى اللقاء
+في أمان الله
+كل عام وأنت بخير
+عيد ميلاد سعيد
+لا مشكلة
+لا بأس
+بكل تأكيد
+بعد قليل
+قبل قليل
+شلونك شخبارك
+شلون صحتك
+شلون الأهل
+شلون كان يومك
+شنو الأخبار
+شنو تسوي هسه
+شنو تريد
+وينك هسه
+وين أنت هسه
+وين رايح
+ليش هيج
+شكد السعر
+شكد الوقت
+أني بالبيت
+أني بالطريق
+أني بخير الحمد لله
+هسه أجي
+هسه جاي
+هسه أرسل لك
+راح أرسل لك
+راح أجي باجر
+باجر نشوفك
+دزلي الصورة
+دزلي الملف
+دزلي رسالة
+تسلم حبيبي
+تسلمين حبيبتي
+حياك الله
+الله يخليك
+تمام الحمد لله
+زين الحمد لله
+إي والله
+مو مشكلة
+ماكو مشكلة
+أكو وقت
+يلا نروح

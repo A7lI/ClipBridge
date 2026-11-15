@@ -36,3 +36,15 @@ The Worker passes encrypted WebRTC setup messages between paired devices. It doe
 Keep the web app open during a transfer. Cancelled or disconnected uploads remove their temporary data. Completed files on Windows remain in Received files even if an acknowledgement is lost. Save received phone files before closing the app. Image clipboard conversion on Windows uses the existing 24 megapixel / 12 MB normalized PNG limit. Larger photos can transfer as files within the 300 MB batch limit.
 
 The app uses [jsQR 1.4.0](https://www.npmjs.com/package/jsqr) to decode camera frames and photos on the phone. The bundled script is the upstream `dist/jsQR.js` minified with Terser 5.51.2. The Apache 2.0 license is included in `public/vendor/jsQR-LICENSE.txt`.
+
+## Phone-to-phone sharing (Android 0.6.5 / mobile web)
+
+Open **Phone-to-phone sharing** in Android or use [the phone sharing screen](https://www.a7li.dev/apps/clipbridge/web/phone) on iPhone. Supports Android ↔ iPhone and phones of the same type, with no PC. Windows remains version 0.6.4.
+
+- **Online:** both phones need internet, including different Wi-Fi/mobile networks. One creates an invitation; the other scans its QR or opens the private link. Check the six-digit code on both screens. Transfers use AES-256-GCM with direction/sequence authentication. Cloudflare forwards bounded encrypted WebSocket frames without persisting transfer data.
+- **Offline nearby:** open the screen online once on each phone and wait for **Ready for offline nearby sharing**. Join the same Wi-Fi/hotspot; internet is unnecessary. The first phone creates an offline invitation, the second scans it and shows a return QR, and the first scans that return QR. WebRTC uses local candidates with no STUN/TURN or internet signaling. The service worker caches app files only. Guest-network isolation can block a direct connection.
+- Both phones keep the screen open. Explicitly accept each incoming transfer. Send text up to 4 KB, or 1–20 photos/files totaling 300 MB. Decline, cancel, and disconnect are supported. There is no background delivery queue. Online sessions expire after two hours.
+- On Android, **Save to Downloads**, **Copy file**, and **Copy photo** write a complete file into Downloads/ClipBridge. Copy controls also place its content URI on the clipboard. Text has a native copy action. iPhone uses Download/Share and Copy photo; documents can be copied after saving to Files. Save received files before closing the sharing screen.
+- Online relay usage counts against the existing Cloudflare Workers/Durable Objects free quotas. When service quotas are exhausted, online sharing may be unavailable until reset; offline nearby does not use the relay. No paid storage or TURN service is configured.
+
+QR generation uses qrcode-generator 2.0.4 by Kazuhiko Arase (MIT), with the upstream module in `public/vendor/qrcode.mjs` and its license alongside it.

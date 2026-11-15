@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10191f">
+  <meta name="description" content="Share text, photos and files between iPhone and Android, nearby offline or online across networks.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./app.css">
+  <script src="./vendor/jsQR.js" defer></script>
+  <script type="module" src="./phone-app.mjs"></script>
+  <title>Phone to phone · ClipBridge</title>
+</head>
+<body>
+  <main>
+    <header><img src="./icon-192.png" width="52" height="52" alt=""><div><h1>ClipBridge</h1><p>Phone ↔ Phone</p></div></header>
+    <p><a href="./" class="text-link">← Computer sharing</a></p>
+    <section id="phone-setup" aria-labelledby="phone-title">
+      <h2 id="phone-title">Connect another phone</h2>
+      <p>iPhone ↔ Android, iPhone ↔ iPhone, or Android ↔ Android. No PC needed. Keep both sharing screens open.</p>
+      <label for="phone-mode">Connection</label>
+      <select id="phone-mode"><option value="online">Online · different networks</option><option value="offline">Offline nearby · same Wi-Fi or hotspot</option></select>
+      <p id="mode-note">Both phones need internet. Transfers are encrypted between the phones and relayed without saving files on the server.</p>
+      <button id="create-phone" type="button">Create invitation</button>
+      <div id="invitation" hidden>
+        <h3 id="invitation-title">Invitation</h3>
+        <p id="invitation-note"></p>
+        <canvas id="invitation-qr" aria-label="Phone pairing QR code" role="img"></canvas>
+        <label for="invitation-link">Private invitation or return code</label>
+        <textarea id="invitation-link" rows="2" readonly></textarea>
+        <div class="actions"><button id="copy-invitation" type="button" class="secondary">Copy invitation</button><button id="share-invitation" type="button" class="secondary">Share invitation</button></div>
+      </div>
+      <div class="file-controls">
+        <h3>Have an invitation?</h3>
+        <div class="actions"><button id="scan-phone" type="button" class="secondary">Scan phone QR</button><button id="choose-phone-qr" type="button" class="secondary">Choose QR photo</button></div>
+        <input id="phone-qr-photo" type="file" accept="image/*" hidden>
+        <div id="phone-camera" hidden><video id="phone-camera-view" aria-label="Phone QR camera" autoplay muted playsinline></video><button id="close-phone-camera" type="button" class="secondary">Close camera</button></div>
+        <form id="join-phone"><label for="join-phone-link">Paste an invitation or return code</label><textarea id="join-phone-link" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" required></textarea><button id="join-phone-button" type="submit">Connect</button></form>
+      </div>
+    </section>
+    <section id="phone-connected" hidden>
+      <h2>Connected to a phone</h2>
+      <p>Check that both screens show <strong id="phone-code"></strong>. If they differ, disconnect and pair again.</p>
+    </section>
+    <p id="offline-ready" role="status">Preparing offline access…</p>
+    <div id="phone-transfers" hidden>
+      <section aria-labelledby="phone-send-title">
+        <h2 id="phone-send-title">Send</h2>
+        <label for="phone-draft">Text · up to 4 KB</label><textarea id="phone-draft" rows="3" placeholder="Type or paste text or a photo"></textarea>
+        <div class="actions"><button id="phone-send-text" type="button">Send text</button><button id="phone-paste" type="button" class="secondary">Paste &amp; send</button></div>
+        <div class="file-controls"><label for="phone-files">Choose files · up to 20 files, 300 MB total</label><input id="phone-files" type="file" multiple><label for="phone-photos">Photo library</label><input id="phone-photos" type="file" accept="image/*" multiple><p id="phone-selection"></p><button id="phone-send-files" type="button">Send selected files</button></div>
+        <p id="phone-send-status" role="status" aria-live="polite"></p><progress id="phone-send-progress" max="100" value="0" aria-label="Send progress" hidden></progress><button id="phone-cancel-send" type="button" class="secondary" hidden>Cancel send</button>
+      </section>
+      <section aria-labelledby="phone-receive-title">
+        <h2 id="phone-receive-title">Receive</h2><p>The other phone chooses what to send. Accept only transfers you expect.</p>
+        <div id="phone-offer" hidden><p id="phone-offer-description"></p><div class="actions"><button id="phone-accept" type="button">Accept transfer</button><button id="phone-decline" type="button" class="secondary">Decline</button></div></div>
+        <p id="phone-receive-status" role="status" aria-live="polite"></p><progress id="phone-receive-progress" max="100" value="0" aria-label="Receive progress" hidden></progress>
+        <div id="phone-received-text" hidden><label for="phone-incoming">Received text</label><textarea id="phone-incoming" rows="3" readonly></textarea><button id="phone-copy-text" type="button" class="secondary">Copy text</button></div>
+        <div id="received-files" hidden><p>Save received files before closing this screen. On iPhone, save documents to Files to copy them there.</p><div id="received-list"></div><button id="share-files" type="button" class="secondary">Save or share files</button></div>
+      </section>
+    </div>
+    <div id="status" role="status" aria-live="polite" hidden></div>
+    <button id="disconnect-phone" type="button" class="secondary" hidden>Disconnect phone</button>
+    <details><summary>How offline sharing works</summary><p>Open this page online once on each phone and wait for “Ready for offline nearby sharing”. Connect both phones to the same Wi-Fi or hotspot. Choose Offline nearby. One phone creates an invitation; the second scans it and shows a return QR. The first phone scans that return QR. Files then travel directly between the phones without internet. Some guest Wi-Fi networks block local connections.</p><p>Online sharing works across Wi-Fi and mobile data. Both phones must stay open and connected; there is no offline delivery queue. Invites are private and stop working when the session ends. Mobile data charges may apply.</p></details>
+  </main>
+</body>
+</html>

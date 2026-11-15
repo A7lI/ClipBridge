@@ -1,0 +1,25 @@
+ClipBridge offline dictionary credits
+
+English and Arabic word frequencies: FrequencyWords by Hermit Dave,
+https://github.com/hermitdave/FrequencyWords
+Source revision: 525f9b560de45753a5ea01069454e72e9aa541c6
+Files: content/2018/en/en_50k.txt and content/2018/ar/ar_50k.txt
+FrequencyWords content is licensed under Creative Commons Attribution-ShareAlike 4.0 International.
+https://creativecommons.org/licenses/by-sa/4.0/
+The complete license accompanies these dictionaries in CC-BY-SA-4.0.txt.
+
+The frequency lists were generated from OPUS OpenSubtitles 2018, originating
+from OpenSubtitles. Credit: Hermit Dave, OpenSubtitles and the OPUS project.
+https://www.opensubtitles.org/
+https://opus.nlpl.eu/OpenSubtitles-v2018.php
+
+Changes by ClipBridge (2026): excluded non-word tokens, digits, punctuation-only
+entries, corpus markup and words longer than 32 characters; retained contractions;
+added Iraqi Arabic and technology vocabulary. Modified en.txt/ar.txt are distributed
+under the same CC BY-SA 4.0 license. Runtime lookup additionally folds Arabic
+diacritics/tatweel/alef variants and Persian yeh/kaf for matching.
+No endorsement by the original authors is implied.
+
+The separately authored phrases.txt contains common English, Arabic and Iraqi
+chat phrase hints. It is not extracted from the subtitle corpus.
+No typed user text is included in these shipped data files.
