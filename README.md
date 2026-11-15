@@ -2,38 +2,41 @@
 
 Copy here. Paste there.
 
-An early preview by A7li for sharing clipboard text, images, files, camera photos and QR text between **Windows x64 and Android 11+** over the same local network.
+ClipBridge shares clipboard text, photos and files between Windows and Android over your local network. The iPhone web preview supports plain-text transfers with Windows.
 
-[Website and setup](https://www.a7li.dev/apps/clipbridge/) · [Android 0.5.1 keyboard preview](https://github.com/A7lI/ClipBridge/releases/tag/v0.5.1-keyboard) · [Windows 0.5.0 preview](https://github.com/A7lI/ClipBridge/releases/tag/v0.5.0-preview)
+| Platform | Preview | Download |
+| --- | --- | --- |
+| Windows x64 | 0.6.3 web preview | [Download Windows ZIP](https://github.com/A7lI/ClipBridge/releases/download/v0.6.3-web-preview/ClipBridge-Windows-0.6.3-web-preview.zip) |
+| Android 11+ | 0.6.2 | [Download Android APK](https://github.com/A7lI/ClipBridge/releases/download/v0.6.2-preview/ClipBridge-Android-0.6.2.apk) |
+| iPhone | Home Screen web app | [Open ClipBridge in Safari](https://www.a7li.dev/apps/clipbridge/web/) |
 
-**Android 0.5.1 upgrade:** the supplied APK uses a different signing certificate from 0.5.0. Android cannot install it over that release. Save important app-private files before uninstalling the old Android app, then install 0.5.1 and pair again. Uninstalling removes pairing settings and private app data.
+[Website and setup](https://www.a7li.dev/apps/clipbridge/) · [Windows release and checksums](https://github.com/A7lI/ClipBridge/releases/tag/v0.6.3-web-preview) · [Android release and checksums](https://github.com/A7lI/ClipBridge/releases/tag/v0.6.2-preview)
 
-## Get started
+## Windows
 
-1. Download and extract the Windows ZIP, then open **ClipBridge-PC.exe**.
-2. Install the Android APK and open ClipBridge on your phone.
-3. Connect both devices to the same Wi-Fi. Scan the PC pairing QR from the phone app.
-4. Enable and select ClipBridge Keyboard for automatic Android clipboard sharing and voice typing, then start syncing. Manual file, camera and QR sharing also work with your usual keyboard.
-5. For voice typing, click **Download Canary model** in the PC app. The 218 MB model downloads directly from the publisher on Hugging Face and activates automatically. No file moving, folder selection, Cipher, Handy, Python installation or API key is required.
+Extract the ZIP and run **ClipBridge-PC.exe**. If an older instance is running, quit it from the system tray first. Connect your phone and PC to the same Wi-Fi.
 
-The Windows app includes its own speech engine. Canary stays on the PC; no speech weights are included in the phone APK. After the initial download, English voice typing runs locally while the paired PC is connected. English and Arabic keyboard layouts are included.
+## iPhone web preview
 
-## Current limits
+1. On Windows, open **iPhone web pairing…** and click **Enable web pairing**.
+2. Open the web app in Safari and use **Share → Add to Home Screen**.
+3. Launch ClipBridge from your Home Screen and tap **Scan pairing QR**. Scan the QR shown on Windows.
+4. Use **Send to PC** or **Get from PC**. The latter reads the Windows clipboard when you tap it. It also works for text copied while the web app was closed.
 
-- Windows x64 and Android 11+ only. **No iPhone app is available.**
-- Early preview: physical-phone clipboard, microphone, background execution and password-manager behavior still need broader testing.
-- Voice typing is English only, up to 60 seconds per recording, and needs the PC running.
-- Text up to 1 MB; images and file batches up to 12 MB; at most 20 files per batch.
-- There is no offline transfer queue. Image pasting depends on the receiving app.
+The web preview supports plain text up to 4 KB per transfer. The [SwiftUI source preview](https://github.com/A7lI/ClipBridge/releases/tag/v0.1.0-iphone-preview) is also available for Xcode users.
 
-## Privacy
+## Android
 
-Transfers use an authenticated, encrypted local connection. No ClipBridge account or cloud transcription service is required. Hugging Face is contacted only for the optional model download; audio is not sent there. Keep your pairing QR private, and pause syncing when you do not want copied items shared. This preview has not had an independent security audit.
+Install the Android APK, open ClipBridge, and scan the Android pairing QR shown on your PC. Enable and select ClipBridge Keyboard for automatic phone clipboard sharing and voice typing. Manual file, camera and QR sharing work with your usual keyboard.
 
-## Source and notices
+**Updating from the public Android 0.5.1 preview:** Android requires a reinstall because the signing certificate changed. Save important app-private files, uninstall the older version, install 0.6.2, and pair again.
 
-The 0.5.0 release includes the complete **ClipBridge-Source-0.5.0-preview.zip**, setup guide, checksums and third-party licenses. The Android 0.5.1 keyboard preview distributes the supplied APK and its checksum; updated 0.5.1 source was not provided. Model weights are downloaded separately. Canary is NVIDIA’s Canary 180M Flash, converted to GGUF/Q8_0 by handy-computer, under CC BY 4.0.
+Android and Windows support text up to 1 MB, a normalized image up to 12 MB, and up to 20 files totaling 300 MB per batch. For optional offline English voice typing, click **Download Canary model** in the Windows app. The model downloads separately and stays on the PC.
 
-[Model publisher](https://huggingface.co/handy-computer/canary-180m-flash-gguf) · [Original NVIDIA model](https://huggingface.co/nvidia/canary-180m-flash)
+## Privacy and source
 
-For a problem report, include your app version, Windows version, phone model and steps to reproduce it. [Open an issue](https://github.com/A7lI/ClipBridge/issues) or email support@a7li.dev.
+Clipboard transfers use an authenticated, encrypted connection directly between your paired devices. The iPhone web app uses Cloudflare to set up the connection. Keep the pairing QR private and pause syncing whenever you want to stop sharing.
+
+The [Windows release](https://github.com/A7lI/ClipBridge/releases/tag/v0.6.3-web-preview) includes the app source, SHA-256 checksums, and third-party notices. The Windows build uses FFmpeg under LGPL v3 or later. [FFmpeg source](https://github.com/A7lI/ClipBridge/releases/download/v0.6.3-web-preview/ffmpeg-9.0.2.tar.xz)
+
+For help, include your ClipBridge version, Windows version, phone model, and steps to reproduce the issue. [Open an issue](https://github.com/A7lI/ClipBridge/issues) or email support@a7li.dev.
