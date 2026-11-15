@@ -1,5 +1,5 @@
-const version = 'clipbridge-mobile-0.7.0-v1';
-const assets = ['./', './index.html', './phone.html', './app.css', './app.mjs', './transport.mjs', './files.mjs', './phone-app.mjs', './phone-transport.mjs', './phone-qr.mjs', './offline.mjs', './ui.mjs', './manifest.webmanifest', './icon-192.png', './icon-512.png', './vendor/jsQR.js', './vendor/qrcode.mjs'];
+const version = 'clipbridge-mobile-0.7.0-v2';
+const assets = ['./', './index.html', './phone.html', './app.css', './app.mjs', './transport.mjs', './files.mjs', './phone-app.mjs', './phone-transport.mjs', './phone-qr.mjs', './offline.mjs', './ui.mjs', './boot.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './vendor/jsQR.js', './vendor/qrcode.mjs'];
 self.addEventListener('install', event => event.waitUntil(caches.open(version).then(cache => cache.addAll(assets))));
 self.addEventListener('activate', event => event.waitUntil((async () => {
   for (const key of await caches.keys()) if (key.startsWith('clipbridge-mobile-') && key !== version) await caches.delete(key);
