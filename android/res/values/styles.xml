@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="ClipBridge" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#c7b5ff</item>
+        <item name="android:windowBackground">#080911</item>
+        <item name="android:colorBackground">#080911</item>
+        <item name="android:statusBarColor">#080911</item>
+        <item name="android:navigationBarColor">#080911</item>
+        <item name="android:textColorPrimary">#f5f3fa</item>
+        <item name="android:textColorSecondary">#aaa6bf</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
     <style name="ClipBridgeKeyboard" parent="@android:style/Theme.DeviceDefault.InputMethod">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:navigationBarColor">#10191f</item>
-        <item name="android:navigationBarDividerColor">#10191f</item>
+        <item name="android:navigationBarColor">#080911</item>
+        <item name="android:navigationBarDividerColor">#080911</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:enforceNavigationBarContrast">false</item>
     </style>

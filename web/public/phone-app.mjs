@@ -3,6 +3,9 @@ import { validateFiles } from './transport.mjs';
 import { showFiles, clearFiles } from './files.mjs';
 import { drawQR, readQR, readQRPhoto } from './phone-qr.mjs';
 import { prepareOffline } from './offline.mjs';
+import { setupPickers, describeSelection } from './ui.mjs';
+
+setupPickers();
 
 const byId = id => document.getElementById(id);
 let session, activeSend, selected = [], camera, preparing = false, hasReceived = false;
@@ -19,6 +22,7 @@ function render() {
   for (const id of ['phone-send-text', 'phone-paste', 'phone-files', 'phone-photos']) byId(id).disabled = Boolean(activeSend) || !connected;
   byId('phone-send-files').disabled = Boolean(activeSend) || !connected || !selected.length;
   byId('phone-cancel-send').hidden = !activeSend;
+  for (const button of document.querySelectorAll('[data-pick]')) button.disabled = byId(button.dataset.pick).disabled;
 }
 function createSession() {
   stopCamera(); session?.close();
@@ -45,6 +49,7 @@ function createSession() {
     byId('phone-connected').hidden = true; byId('phone-setup').hidden = false;
     byId('disconnect-phone').hidden = true;
     say(detail.message, true);
+    render();
   });
   next.addEventListener('offer', ({ detail }) => {
     byId('phone-offer-description').textContent = detail.kind === 'text' ? `Text from the other phone: ${detail.text.slice(0, 180)}` : `${detail.files.length} file(s) · ${(detail.files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(1)} MB\n${detail.files.map(f => f.name).join(', ')}`;
@@ -84,7 +89,7 @@ async function prepare(operation) {
 function showInvitation(link, answer = false) {
   byId('invitation-title').textContent = answer ? 'Return QR' : 'Your private invitation';
   byId('invitation-link').value = link;
-  byId('invitation-note').textContent = answer ? 'Ask the first phone to scan this return QR. Keep this screen open.' : byId('phone-mode').value === 'offline' ? 'The second phone scans this QR, then shows a return QR. Scan that return QR here to finish connecting.' : 'Have the other phone scan this QR, or send it the private link. Keep this screen open.';
+  byId('invitation-note').textContent = answer ? 'Scan this with the first phone to connect.' : byId('phone-mode').value === 'offline' ? 'Scan on the other phone. Then scan its return QR here.' : 'Scan this QR or share the private link.';
   drawQR(byId('invitation-qr'), link);
   if (byId('invitation-qr').hidden) byId('invitation-note').textContent += ' The code is too large for one QR; copy the pairing code instead.';
   byId('invitation').hidden = false;
@@ -112,12 +117,12 @@ async function join(value) {
 }
 byId('join-phone').addEventListener('submit', event => { event.preventDefault(); const value = byId('join-phone-link').value; byId('join-phone-link').value = ''; join(value); });
 function updateMode() {
-  byId('mode-note').textContent = byId('phone-mode').value === 'offline' ? 'No internet is needed after this page is saved for offline use. Both phones must be on the same Wi-Fi or hotspot. Pairing uses an invitation QR and a return QR.' : 'Both phones need internet. Transfers are encrypted between the phones and relayed without saving files on the server.';
+  byId('mode-note').textContent = byId('phone-mode').value === 'offline' ? 'Same Wi-Fi or hotspot. Open online once first.' : 'Different networks. Both phones need internet.';
 }
 byId('phone-mode').addEventListener('change', updateMode);
 byId('copy-invitation').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(byId('invitation-link').value); say('Invitation copied. Share it only with the intended phone.'); }
-  catch { byId('invitation-link').select(); say('Select the invitation and use Copy.'); }
+  catch { byId('invitation-link').closest('details').open = true; byId('invitation-link').select(); say('Select the invitation and use Copy.'); }
 });
 byId('share-invitation').hidden = !navigator.share;
 byId('share-invitation').addEventListener('click', async () => {
@@ -128,14 +133,14 @@ async function send(item) {
   if (activeSend || !session?.ready) return;
   const controller = new AbortController(); activeSend = controller; render();
   const timeout = setTimeout(() => controller.abort(new Error('Transfer timed out. Keep both phones open and try again.')), 30 * 60 * 1000);
-  try { await session.send(item, controller.signal); byId('phone-send-status').textContent = 'Received by the other phone. Ask them to save any files before closing.'; }
+  try { await session.send(item, controller.signal); byId('phone-send-status').textContent = 'Received by the other phone.'; }
   catch (error) { byId('phone-send-status').textContent = error.message || 'Could not send. Check the other phone before retrying.'; }
   finally { clearTimeout(timeout); activeSend = undefined; byId('phone-send-progress').hidden = true; render(); }
 }
 byId('phone-send-text').addEventListener('click', () => send({ kind: 'text', text: byId('phone-draft').value }));
 byId('phone-send-files').addEventListener('click', () => send({ kind: 'files', files: selected }));
 for (const id of ['phone-files', 'phone-photos']) byId(id).addEventListener('change', event => {
-  try { const files = Array.from(event.target.files); validateFiles(files); selected = files; byId('phone-selection').textContent = files.map(f => f.name).join(', '); }
+  try { const files = Array.from(event.target.files); validateFiles(files); selected = files; describeSelection(files, byId('phone-selection')); }
   catch (error) { selected = []; byId('phone-selection').textContent = ''; say(error.message, true); }
   render();
 });

@@ -71,7 +71,7 @@ public class BridgeKeyboard extends InputMethodService {
             public void onViewDetachedFromWindow(View view){}
         });
         LinearLayout toolbar=new LinearLayout(this);toolbar.setGravity(Gravity.CENTER_VERTICAL);
-        info=new TextView(this);info.setTextColor(MainActivity.ACCENT);info.setTextSize(12);info.setPadding(dp(9),0,0,0);info.setText("ClipBridge · Wi-Fi");
+        info=new TextView(this);info.setTextColor(MainActivity.ACCENT);info.setTextSize(12);info.setPadding(dp(9),0,0,0);info.setText("ClipBridge");
         toolbar.addView(info,new LinearLayout.LayoutParams(0,dp(40),1));
         mic=key(toolbar,"Mic",1,()->voice());mic.setContentDescription("Start or stop voice typing");
         key(toolbar,"Paste",1,()->paste());key(toolbar,"⚙",.7f,()->settings());root.addView(toolbar);
@@ -84,7 +84,7 @@ public class BridgeKeyboard extends InputMethodService {
         b.setPadding(0,0,0,0);b.setMinWidth(0);b.setMinimumWidth(0);b.setMinHeight(0);b.setMinimumHeight(0);
         // Emit feedback explicitly so the app toggle also controls long presses.
         b.setHapticFeedbackEnabled(false);
-        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(MainActivity.PANEL));
+        b.setBackground(Ui.key(this,MainActivity.PANEL,8));
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(47),weight);p.setMargins(dp(1),dp(1),dp(1),dp(1));parent.addView(b,p);b.setOnClickListener(v->{feedback(b);click.run();});return b;
     }
     private void feedback(View view){if(Prefs.get(this).getBoolean("keyboard_vibration",true))view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP,HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);}

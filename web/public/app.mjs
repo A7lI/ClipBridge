@@ -1,8 +1,10 @@
 import { keyFromLink, maxText, request, validateFiles, sendFiles, receiveFiles } from './transport.mjs';
 import { showFiles, clearFiles } from './files.mjs';
 import { prepareOffline } from './offline.mjs';
+import { setupPickers, describeSelection } from './ui.mjs';
 
 prepareOffline();
+setupPickers();
 
 const byId = id => document.getElementById(id);
 const storageKey = 'clipbridge.web.pairing.v1';
@@ -122,7 +124,7 @@ for (const id of ['send-files', 'send-photos']) {
       const files = Array.from(event.target.files);
       validateFiles(files);
       selectedFiles = files;
-      byId('selected-files').textContent = files.map(file => file.name).join(', ');
+      describeSelection(files, byId('selected-files'));
     } catch (error) {
       selectedFiles = [];
       byId('selected-files').textContent = '';

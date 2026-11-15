@@ -16,4 +16,4 @@ The optional Canary model download is NVIDIA Canary 180M Flash, converted to GGU
 
 The Windows notification icon uses pystray 0.19.5 (LGPL-3.0) and six 1.17.0 (MIT). Their distribution licenses are preserved in `licenses/pystray/` and `licenses/six/`. The application sources and rebuild scripts are supplied alongside the binaries.
 
-Phone-to-phone QR generation uses qrcode-generator 2.0.4 by Kazuhiko Arase (MIT). The unmodified upstream ESM module and MIT license are in `web/public/vendor/`. Camera/photo QR decoding continues to use jsQR 1.4.0 (Apache 2.0), with its bundled notice. The Android phone-sharing screen uses the system WebView and Android framework APIs; no third-party native networking library is added.
+Phone-to-phone QR generation uses qrcode-generator 2.0.4 by Kazuhiko Arase (MIT). The upstream ESM module, minified with Terser 5.51.2, and MIT license are in `web/public/vendor/`. Camera/photo QR decoding continues to use jsQR 1.4.0 (Apache 2.0), with its bundled notice. The Android phone-sharing screen uses the system WebView and Android framework APIs; no third-party native networking library is added.

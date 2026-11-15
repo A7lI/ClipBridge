@@ -1,0 +1,5 @@
+LIBRARY ClipBridge-Shell.dll
+
+EXPORTS
+DllCanUnloadNow
+DllGetClassObject

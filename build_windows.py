@@ -35,6 +35,9 @@ def build(voice_python, work, output):
         '--distpath', str(output), '--workpath', str(work/'app-build'),
         '--specpath', str(work), '--paths', str(root/'desktop'),
         '--add-binary', str(voice_dist/'ClipBridge-Voice.exe')+';engines',
+        '--add-data', str(root/'desktop/assets/clipbridge.png')+';assets',
+        '--icon', str(root/'desktop/assets/clipbridge.ico'),
+        '--version-file', str(root/'desktop/version-info.txt'),
         str(root/'desktop/app.py')], check=True)
     # Preserve notices from the exact voice build environment.
     collect = r'''

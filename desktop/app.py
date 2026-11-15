@@ -33,7 +33,7 @@ from web_bridge import WebBridge
 APPDATA = Path(os.environ.get('LOCALAPPDATA', '.')) / 'ClipBridge'
 CONFIG = APPDATA / 'settings.json'
 WEB_APP_URL = os.environ.get('CLIPBRIDGE_WEB_URL', 'https://www.a7li.dev/apps/clipbridge/web/')
-BG, PANEL, FG, MUTED, ACCENT = '#10191f', '#1b282f', '#edf4f3', '#a9bcc0', '#8ee3c3'
+BG, PANEL, FG, MUTED, ACCENT = '#080911', '#141420', '#f5f3fa', '#aaa6bf', '#c7b5ff'
 
 
 class Blob(C.Structure):
@@ -144,98 +144,143 @@ class App:
                         font=('Segoe UI', size), **kwargs)
 
     def button(self, parent, text, command, primary=False):
-        return tk.Button(parent, text=text, command=command, bg=ACCENT if primary else '#2c3e46',
-                         fg=BG if primary else FG, activebackground='#b3f3dc', activeforeground=BG,
-                         font=('Segoe UI Semibold', 11), relief='flat', padx=18, pady=11, cursor='hand2')
+        return tk.Button(parent, text=text, command=command, bg=ACCENT if primary else '#282035',
+                         fg=BG if primary else FG, activebackground='#ddd0ff', activeforeground=BG,
+                         font=('Segoe UI Semibold', 10), relief='flat', padx=15, pady=9, highlightthickness=1, highlightbackground='#443653', highlightcolor=ACCENT, cursor='hand2')
 
     def render(self):
-        r = self.root
-        r.title('ClipBridge · Phone ↔ PC')
-        r.geometry('720x790')
-        r.minsize(660, 740)
-        r.configure(bg=BG)
-        canvas = tk.Canvas(r, bg=BG, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(r, orient='vertical', command=canvas.yview)
-        scrollbar.pack(side='right', fill='y')
-        canvas.pack(side='left', fill='both', expand=True)
-        canvas.configure(yscrollcommand=scrollbar.set)
-        r = tk.Frame(canvas, bg=BG)
-        window = canvas.create_window((0, 0), window=r, anchor='nw')
-        r.bind('<Configure>', lambda _: canvas.configure(scrollregion=canvas.bbox('all')))
-        canvas.bind('<Configure>', lambda e: canvas.itemconfigure(window, width=e.width))
-        self.root.bind('<MouseWheel>', lambda e: canvas.yview_scroll(-int(e.delta/120), 'units'))
-        header = tk.Frame(r, bg=BG)
-        header.pack(fill='x', padx=28, pady=(23, 16))
-        self.label(header, 'ClipBridge', 27).pack(anchor='w')
-        self.label(header, 'Copy here. Paste there.', 13, ACCENT).pack(anchor='w', pady=(3, 0))
-        self.connection = self.label(header, 'Waiting for your phone', 10, MUTED)
-        self.connection.pack(anchor='w', pady=(12, 0))
-
-        pair = tk.Frame(r, bg=PANEL, padx=22, pady=16)
-        pair.pack(fill='x', padx=28)
-        self.label(pair, '01   CONNECT YOUR PHONE', 11, ACCENT).pack(anchor='w')
+        root = self.root
+        root.title('ClipBridge')
+        root.geometry('710x650')
+        root.minsize(640, 600)
+        root.configure(bg=BG)
+        style = ttk.Style(root)
+        style.theme_use('clam')
+        style.configure('TNotebook', background=BG, borderwidth=0, tabmargins=(0, 0, 0, 12))
+        style.configure('TNotebook.Tab', background='#171521', foreground=MUTED, padding=(22, 10), font=('Segoe UI Semibold', 10), borderwidth=0)
+        style.map('TNotebook.Tab', background=[('selected', '#30243f')], foreground=[('selected', ACCENT)])
+        style.layout('Plain.TNotebook.Tab', [])
+        style.configure('Plain.TNotebook', background=BG, borderwidth=0, lightcolor=BG, darkcolor=BG, bordercolor=BG)
+        style.configure('Vertical.TScrollbar', background='#30243f', troughcolor=BG, arrowcolor=MUTED, bordercolor=BG, lightcolor=BG, darkcolor=BG)
+        style.configure('TProgressbar', background=ACCENT, troughcolor='#211c30', borderwidth=0, lightcolor=ACCENT, darkcolor=ACCENT)
+        style.configure('TCombobox', fieldbackground=BG, foreground=FG, background=PANEL, arrowcolor=ACCENT)
+        header = tk.Frame(root, bg=BG)
+        header.pack(fill='x', padx=22, pady=(18, 12))
+        logo_path = Path(getattr(sys, '_MEIPASS', Path(__file__).parent)) / 'assets' / 'clipbridge.png'
+        if logo_path.is_file():
+            self.logo_image = ImageTk.PhotoImage(Image.open(logo_path).resize((36, 36), Image.Resampling.LANCZOS))
+            tk.Label(header, image=self.logo_image, bg=BG).pack(side='left', padx=(0, 9))
+            root.iconphoto(True, self.logo_image)
+        self.label(header, 'ClipBridge.', 22).pack(side='left')
+        self.label(header, '0.7.0', 10, MUTED).pack(side='right')
+        self.connection = self.label(root, 'Connect your phone to get started', 10, MUTED)
+        self.connection.pack(anchor='w', padx=24, pady=(0, 12))
+        navigation = tk.Frame(root, bg='#12111d', padx=4, pady=4)
+        navigation.pack(fill='x', padx=22, pady=(0, 12))
+        self.nav_buttons = []
+        self.pages = ttk.Notebook(root, style='Plain.TNotebook')
+        for index, title in enumerate(('Share', 'Connect', 'Settings')):
+            button = self.button(navigation, title, lambda index=index: self.show_page(index))
+            button.pack(side='left', fill='x', expand=True, padx=2)
+            self.nav_buttons.append(button)
+        self.pages.pack(fill='both', expand=True, padx=22)
+        self.page_canvases = {}
+        def page(title):
+            frame = tk.Frame(self.pages, bg=BG)
+            self.pages.add(frame, text=title)
+            canvas = tk.Canvas(frame, bg=BG, highlightthickness=0)
+            scrollbar = ttk.Scrollbar(frame, orient='vertical', command=canvas.yview)
+            scrollbar.pack(side='right', fill='y')
+            canvas.pack(side='left', fill='both', expand=True)
+            canvas.configure(yscrollcommand=scrollbar.set)
+            body = tk.Frame(canvas, bg=BG)
+            window = canvas.create_window((0, 0), window=body, anchor='nw')
+            def layout(event=None):
+                canvas.configure(scrollregion=canvas.bbox('all'))
+                if body.winfo_reqheight() > canvas.winfo_height() + 2:
+                    if not scrollbar.winfo_manager(): scrollbar.pack(side='right', fill='y')
+                else:
+                    scrollbar.pack_forget()
+            body.bind('<Configure>', layout)
+            canvas.bind('<Configure>', lambda event: (canvas.itemconfigure(window, width=event.width), layout()))
+            self.page_canvases[str(frame)] = canvas
+            return body
+        def card(parent, title):
+            frame = tk.Frame(parent, bg=PANEL, padx=17, pady=14, highlightbackground='#30293f', highlightthickness=1)
+            frame.pack(fill='x', pady=(0, 12), padx=(0, 6))
+            self.label(frame, title, 15).pack(anchor='w', pady=(0, 8))
+            return frame
+        share = page('Share')
+        connect = page('Connect')
+        settings = page('Settings')
+        root.bind('<MouseWheel>', lambda event: self.page_canvases[self.pages.select()].yview_scroll(-int(event.delta/120), 'units'))
+        clipboard = card(share, 'Clipboard')
+        self.activity = self.label(clipboard, 'Ready to share', 11, MUTED, wraplength=550, justify='left')
+        self.activity.pack(anchor='w', pady=(0, 7))
+        self.toggle = self.button(clipboard, 'Start syncing' if self.state.paused else 'Pause syncing', self.toggle_sync, True)
+        self.toggle.pack(anchor='w')
+        transfer = card(share, 'Send & receive')
+        row = tk.Frame(transfer, bg=PANEL)
+        row.pack(fill='x')
+        self.button(row, 'Send to Android…', self.send_files, True).pack(side='left', padx=(0, 8))
+        self.button(row, 'Send to iPhone…', self.send_web_files).pack(side='left')
+        self.button(row, 'Received files', self.open_received).pack(side='left', padx=(8, 0))
+        self.label(transfer, '20 files · 300 MB total. Copy received files with Ctrl+V.', 10, MUTED).pack(anchor='w', pady=(10, 0))
+        pair = card(connect, 'Connect Android')
         body = tk.Frame(pair, bg=PANEL)
-        body.pack(fill='x', pady=(14, 0))
+        body.pack(fill='x')
         self.qr = self.label(body, '')
-        self.qr.pack(side='left', padx=(0, 22))
+        self.qr.pack(side='left', padx=(0, 18))
         side = tk.Frame(body, bg=PANEL)
         side.pack(side='left', fill='both', expand=True)
-        self.label(side, 'Same Wi-Fi. No account.', 12).pack(anchor='w')
-        self.label(side, 'In the phone app, tap Scan QR code.\nScan this code to pair automatically.\nOther QR codes copy their text to this PC.', 10, MUTED,
-                   justify='left').pack(anchor='w', pady=(8, 13))
-        self.label(side, 'PC Wi-Fi address', 10, MUTED).pack(anchor='w')
-        self.host = ttk.Combobox(side, values=addresses(), font=('Segoe UI', 11))
+        self.label(side, 'Same Wi-Fi.', 12, ACCENT).pack(anchor='w', pady=(9, 5))
+        self.label(side, 'In ClipBridge on your phone,\nopen Connect and scan this QR.', 10, MUTED, justify='left').pack(anchor='w')
+        advanced = tk.Frame(pair, bg=PANEL)
+        def toggle_advanced():
+            if advanced.winfo_manager(): advanced.pack_forget()
+            else: advanced.pack(fill='x', pady=(10, 0))
+        self.button(side, 'Link & Wi-Fi options', toggle_advanced).pack(anchor='w', pady=(12, 0))
+        self.label(advanced, 'PC address', 10, MUTED).pack(anchor='w')
+        self.host = ttk.Combobox(advanced, values=addresses(), font=('Segoe UI', 10))
         self.host.set(addresses()[0])
-        self.host.pack(fill='x', pady=(5, 0))
+        self.host.pack(fill='x', pady=(4, 8))
         self.host.bind('<<ComboboxSelected>>', lambda _: self.update_pair())
         self.host.bind('<FocusOut>', lambda _: self.update_pair())
-        self.pair_text = tk.Entry(pair, bg=BG, fg=FG, insertbackground=FG, relief='flat', font=('Consolas', 9))
-        self.pair_text.pack(fill='x', pady=(14, 8), ipady=8)
-        self.label(pair, 'Keep this pairing link private: it authorizes access to your clipboard.', 9, MUTED).pack(anchor='w')
-        self.button(pair, 'Reset pairing', self.reset_pair).pack(anchor='w', pady=(8, 0))
-        self.button(pair, 'iPhone web pairing…', self.open_web_pairing).pack(anchor='w', pady=(8, 0))
+        self.pair_text = tk.Entry(advanced, bg=BG, fg=FG, insertbackground=FG, relief='flat', font=('Consolas', 9))
+        self.pair_text.pack(fill='x', ipady=7)
+        self.label(advanced, 'Private link. Share only with your phone.', 9, MUTED).pack(anchor='w', pady=(5, 0))
+        self.button(advanced, 'Reset pairing', self.reset_pair).pack(anchor='w', pady=(8, 0))
         self.update_pair()
-
-        sync = tk.Frame(r, bg=PANEL, padx=22, pady=17)
-        sync.pack(fill='x', padx=28, pady=14)
-        self.label(sync, '02   AUTOMATIC CLIPBOARD', 11, ACCENT).pack(anchor='w')
-        self.label(sync, 'Text + photos + files, in both directions', 13).pack(anchor='w', pady=(9, 4))
-        self.activity = self.label(sync, 'Paused · turn on when you are ready', 10, MUTED)
-        self.activity.pack(anchor='w')
-        self.toggle = self.button(sync, 'Start syncing' if self.state.paused else 'Pause syncing', self.toggle_sync, True)
-        self.toggle.pack(anchor='w', pady=(13, 0))
-        actions = tk.Frame(sync, bg=PANEL)
-        actions.pack(fill='x', pady=(10, 0))
-        self.button(actions, 'Send files…', self.send_files).pack(side='left')
-        self.button(actions, 'Received files', self.open_received).pack(side='left', padx=(8, 0))
-        self.label(sync, 'Up to 20 files / 300 MB total. Copy files in Explorer to sync,\nor use Send files. Phone files arrive ready to paste with Ctrl+V.',
-                   10, MUTED, justify='left').pack(anchor='w', pady=(8, 0))
-        self.auto_sync_var = tk.BooleanVar(value=self.auto_sync)
-        tk.Checkbutton(sync, text='Start syncing automatically when ClipBridge opens', variable=self.auto_sync_var,
-                       command=self.save_auto_sync, bg=PANEL, fg=FG, activebackground=PANEL,
-                       activeforeground=FG, selectcolor=BG, font=('Segoe UI', 10),
-                       highlightthickness=0).pack(anchor='w', pady=(10, 0))
-
-        voice = tk.Frame(r, bg=PANEL, padx=22, pady=16)
-        voice.pack(fill='x', padx=28)
-        self.label(voice, '03   VOICE TYPING', 11, ACCENT).pack(anchor='w')
-        self.voice_status = self.label(voice, '', 11)
-        self.voice_status.pack(anchor='w', pady=(9, 4))
-        self.label(voice, 'Tap the microphone on your phone keyboard.\nCanary transcribes on this PC (English). No Cipher or Handy needed.',
-                   10, MUTED, justify='left').pack(anchor='w')
-        self.label(voice, 'One-time download: 218 MB from Hugging Face. Saved automatically.\nAfter setup, voice typing works offline over your local Wi-Fi.',
-                   10, MUTED, justify='left').pack(anchor='w', pady=(7, 0))
-        self.download_button = self.button(voice, 'Download Canary model', self.download_voice, primary=True)
-        self.download_button.pack(anchor='w', pady=(11, 0))
+        iphone = card(connect, 'Connect iPhone')
+        self.label(iphone, 'Pair the web app on the same Wi-Fi.', 10, MUTED).pack(anchor='w')
+        self.button(iphone, 'iPhone web pairing…', self.open_web_pairing, True).pack(anchor='w', pady=(9, 0))
+        voice = card(settings, 'Offline voice typing')
+        self.voice_status = self.label(voice, '', 10, MUTED, wraplength=550, justify='left')
+        self.voice_status.pack(anchor='w')
+        self.label(voice, 'English · Canary model · 218 MB one-time download', 10, MUTED).pack(anchor='w', pady=(5, 8))
+        row = tk.Frame(voice, bg=PANEL)
+        row.pack(fill='x')
+        self.download_button = self.button(row, 'Download Canary model', self.download_voice, True)
+        self.download_button.pack(side='left', padx=(0, 8))
+        self.choose_model_button = self.button(row, 'Use existing model…', self.choose_model)
+        self.choose_model_button.pack(side='left')
         self.voice_progress = ttk.Progressbar(voice, maximum=100, mode='determinate')
-        self.voice_progress.pack(fill='x', pady=(9, 0))
-        self.model_path = self.label(voice, '', 9, MUTED, wraplength=580, justify='left')
-        self.model_path.pack(anchor='w', pady=(5, 2))
-        self.choose_model_button = self.button(voice, 'Use an existing model…', self.choose_model)
-        self.choose_model_button.pack(anchor='w', pady=(7, 0))
-        self.notice = self.label(r, '', 9, '#ffcaa6', wraplength=655, justify='left')
-        self.notice.pack(fill='x', padx=28, pady=10)
-        self.label(r, 'Leave this window running. Closing it stops clipboard sync and voice typing.', 9, MUTED).pack(pady=(0, 15))
+        # Shown only during a model download.
+        self.model_path = self.label(voice, '', 9, MUTED, wraplength=550, justify='left')
+        self.model_path.pack(anchor='w')
+        preferences = card(settings, 'Preferences')
+        self.auto_sync_var = tk.BooleanVar(value=self.auto_sync)
+        tk.Checkbutton(preferences, text='Start syncing when ClipBridge opens', variable=self.auto_sync_var, command=self.save_auto_sync, bg=PANEL, fg=FG, activebackground=PANEL, activeforeground=FG, selectcolor=BG, font=('Segoe UI', 10), highlightthickness=0).pack(anchor='w')
+        self.button(preferences, 'Help & privacy', lambda: messagebox.showinfo('Quick help', 'PC sharing needs the same Wi-Fi.\n\nKeep pairing links private. Pause syncing to stop sharing your clipboard.\n\nVoice typing uses the Canary model on this PC.\n\nClosing the window keeps ClipBridge in the tray. Choose Quit there to stop it.')).pack(anchor='w', pady=(9, 0))
+        self.notice = self.label(root, '', 9, '#ffc5ba', wraplength=640, justify='left')
+        self.notice.pack(fill='x', padx=24, pady=(5, 0))
+        self.label(root, 'Runs in your system tray.', 9, MUTED).pack(anchor='w', padx=24, pady=(4, 12))
+        self.show_page(0)
+
+    def show_page(self, index):
+        self.pages.select(index)
+        for item, button in enumerate(self.nav_buttons):
+            button.configure(bg='#30243f' if item == index else '#12111d', fg=ACCENT if item == index else MUTED)
 
     def update_pair(self):
         host = self.host.get().strip()
@@ -280,13 +325,13 @@ class App:
         for widget in window.winfo_children():
             widget.destroy()
         self.label(window, 'iPhone web pairing', 17).pack(anchor='w')
-        self.label(window, 'Connect your iPhone and PC to the same Wi-Fi.', 10, MUTED).pack(anchor='w', pady=(6, 10))
-        self.web_status = self.label(window, '', 10, ACCENT)
+        self.label(window, 'Same Wi-Fi. Open ClipBridge in Safari.', 10, MUTED).pack(anchor='w', pady=(6, 10))
+        self.web_status = self.label(window, '', 10, ACCENT, wraplength=365, justify='left')
         self.web_status.pack(anchor='w', pady=(0, 8))
         if self.web:
-            self.web_qr = self.pairing_image(self.web.link)
+            self.web_qr = self.pairing_image(self.web.link, size=200)
             tk.Label(window, image=self.web_qr, bg=BG).pack(pady=8)
-            self.label(window, 'Scan this QR with the iPhone camera. Keep it private.', 10, MUTED).pack(anchor='w')
+            self.label(window, 'Scan from the iPhone web app. Keep this code private.', 10, MUTED).pack(anchor='w')
             link = tk.StringVar(window, value=self.web.link)
             entry = tk.Entry(window, textvariable=link, state='readonly', width=52)
             entry.pack(fill='x', pady=(8, 3), ipady=4)
@@ -301,6 +346,9 @@ class App:
             self.web_status.configure(text=self.web.status if self.web else 'Web pairing is off.')
 
     def send_web_files(self):
+        if not self.web:
+            self.open_web_pairing()
+            return
         paths = filedialog.askopenfilenames(title='Send files to iPhone (300 MB total)')
         if paths and self.web:
             try:
@@ -409,6 +457,7 @@ class App:
         self.download_button.configure(text='Cancel download')
         self.choose_model_button.configure(state='disabled')
         self.voice_progress.configure(value=0)
+        self.voice_progress.pack(fill='x', pady=(10, 3), before=self.model_path)
 
         def download():
             last_update = 0
@@ -440,6 +489,7 @@ class App:
                 self.voice_progress.configure(value=percent)
                 continue
             self.voice_download = None
+            self.voice_progress.pack_forget()
             self.download_button.configure(text='Download Canary model', state='normal')
             self.choose_model_button.configure(state='normal')
             if event[0] == 'complete':
@@ -507,7 +557,7 @@ class App:
         self.check_voice_download()
         self.update_web_status()
         connected = time.monotonic()-self.state.last_seen < 35
-        self.connection.configure(text='● Phone connected · encrypted Wi-Fi link' if connected else '○ Waiting for your phone · same Wi-Fi required',
+        self.connection.configure(text='● Phone connected' if connected else ('○ iPhone pairing ready' if self.web else '○ Ready to connect'),
                                   fg=ACCENT if connected else MUTED)
         self.activity.configure(text='Paused · clipboard is not shared' if self.state.paused else self.state.last_event)
         self.update_voice_status()

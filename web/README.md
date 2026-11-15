@@ -47,4 +47,4 @@ Open **Phone-to-phone sharing** in Android or use [the phone sharing screen](htt
 - On Android, **Save to Downloads**, **Copy file**, and **Copy photo** write a complete file into Downloads/ClipBridge. Copy controls also place its content URI on the clipboard. Text has a native copy action. iPhone uses Download/Share and Copy photo; documents can be copied after saving to Files. Save received files before closing the sharing screen.
 - Online relay usage counts against the existing Cloudflare Workers/Durable Objects free quotas. When service quotas are exhausted, online sharing may be unavailable until reset; offline nearby does not use the relay. No paid storage or TURN service is configured.
 
-QR generation uses qrcode-generator 2.0.4 by Kazuhiko Arase (MIT), with the upstream module in `public/vendor/qrcode.mjs` and its license alongside it.
+QR generation uses qrcode-generator 2.0.4 by Kazuhiko Arase (MIT), with the upstream module minified using Terser 5.51.2 in `public/vendor/qrcode.mjs` and its license alongside it.

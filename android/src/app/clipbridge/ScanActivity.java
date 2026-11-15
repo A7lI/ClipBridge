@@ -22,9 +22,9 @@ public class ScanActivity extends Activity implements SurfaceHolder.Callback {
     @Override public void onCreate(Bundle state){
         super.onCreate(state);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setBackgroundColor(MainActivity.BG);root.setPadding(0,32,0,24);
-        hint=new TextView(this);hint.setText("Point at a QR code\nText is copied straight to your PC. A ClipBridge code pairs your phone.");hint.setTextColor(MainActivity.FG);hint.setTextSize(17);hint.setPadding(24,24,24,24);root.addView(hint);
+        hint=new TextView(this);hint.setText("Scan a QR code");hint.setTextColor(MainActivity.FG);hint.setTextSize(20);hint.setPadding(24,24,24,24);root.addView(hint);
         preview=new SurfaceView(this);root.addView(preview,new LinearLayout.LayoutParams(-1,0,1));preview.getHolder().addCallback(this);
-        Button cancel=new Button(this);cancel.setText("Cancel");cancel.setOnClickListener(v->finish());root.addView(cancel);setContentView(root);
+        Button cancel=Ui.button(this,"Cancel",()->finish(),false);root.addView(cancel,new LinearLayout.LayoutParams(-1,Ui.dp(this,48)));setContentView(root);
     }
     @Override public void surfaceCreated(SurfaceHolder holder){open();}
     @Override public void surfaceChanged(SurfaceHolder h,int f,int w,int height){}

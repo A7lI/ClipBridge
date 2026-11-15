@@ -29,8 +29,8 @@ public class PhoneShareActivity extends Activity {
         LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setBackgroundColor(MainActivity.BG);
         root.setOnApplyWindowInsetsListener((v,insets)->{android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.systemBars());v.setPadding(bars.left,bars.top,bars.right,bars.bottom);return insets;});
         LinearLayout bar=new LinearLayout(this);root.addView(bar);
-        Button back=new Button(this);back.setText("← ClipBridge");bar.addView(back);back.setOnClickListener(v->finish());
-        Button received=new Button(this);received.setText("Saved files");bar.addView(received);received.setOnClickListener(v->startActivity(new Intent(this,FilesActivity.class)));
+        bar.setPadding(12,8,12,8);Ui.action(bar,"← Back",()->finish(),false);
+        Ui.action(bar,"Saved files",()->startActivity(new Intent(this,FilesActivity.class)),false);
         web=new WebView(this);root.addView(web,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);
         WebSettings settings=web.getSettings();settings.setJavaScriptEnabled(true);settings.setDomStorageEnabled(true);settings.setAllowFileAccess(false);settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);settings.setMediaPlaybackRequiresUserGesture(true);
