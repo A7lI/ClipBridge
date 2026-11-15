@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "clipbridge-web",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-15",
+  "assets": {
+    "directory": "public",
+    "run_worker_first": ["/signal/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "PAIRING_ROOMS", "class_name": "PairingRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PairingRoom"] }]
+}

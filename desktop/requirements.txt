@@ -1,0 +1,6 @@
+cryptography>=50,<51
+Pillow>=12,<14
+qrcode>=8,<9
+pystray==0.19.5
+aiortc==1.16.0
+websockets==17.4

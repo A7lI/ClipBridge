@@ -1,0 +1,17 @@
+# Third-party components
+
+Android 0.6.2 word suggestions bundle adapted English and Arabic FrequencyWords/OpenSubtitles 2018 frequency data by Hermit Dave under CC BY-SA 4.0. Full attribution, pinned provenance, modifications and the complete license are in `android/assets/suggestions/` and included in the APK. The app exposes the attribution through **Dictionary credits**. Source: https://github.com/hermitdave/FrequencyWords . `tools/prepare_suggestions.py` reproducibly generates the adapted data. The curated phrase seeds and suggestion-engine implementation are authored for ClipBridge.
+
+The native Explorer command is compiled with portable TinyCC 0.9.27. The compiler is not bundled in the app. Applicable compiler/runtime licensing, the runtime source and its unrestricted combination-linking exception are preserved in `licenses/tinycc/`. The minimal Windows declarations come from the compiler's public-domain MinGW headers; imported Windows system DLLs are not redistributed. Explorer-command implementation source is included in `shell/clipbridge_shell.c`.
+
+The Windows executable packages Python, Tcl/Tk, Pillow, qrcode, cryptography, cffi, and their applicable bundled dependencies using PyInstaller. Their licenses are preserved in the accompanying `licenses/` folder. PyInstaller's bootloader distribution exception permits bundling applications; see the PyInstaller license.
+
+The native Android app uses Android framework APIs and ZXing Core 3.5.3 (Apache 2.0) for offline QR decoding. The pinned JAR is in `android/libs/`; its SHA-256 is checked by the build script. ZXing's license and notice are preserved in `licenses/zxing/` and packaged in the APK's assets. Source: https://github.com/zxing/zxing/tree/zxing-3.5.3. Its autofill request uses the AndroidX inline UI v1 bundle format for interoperability with password managers. Format reference: https://github.com/androidx/androidx/tree/androidx-main/autofill/autofill/src/main/java/androidx/autofill/inline (Android Open Source Project, Apache 2.0). No AndroidX library binary is bundled.
+
+Voice typing bundles transcribe-cpp and transcribe-cpp-native 0.4.1 (MIT), NumPy 2.5.4 (BSD and component notices), ONNX Runtime 1.31.0 (MIT and third-party notices), their Python 3.12 runtime and required dependencies. Exact distribution notices are preserved under `licenses/`. No Cipher or Handy source, settings or runtime paths are needed.
+
+`desktop/voice_vad.py` is vendored from faster-whisper 1.2.1 (MIT); only its asset-directory lookup is changed. The accompanying Silero VAD v6 ONNX asset is included under its MIT license. Notices are in `licenses/faster-whisper/` and `licenses/silero-vad/`.
+
+The optional Canary model download is NVIDIA Canary 180M Flash, converted to GGUF and quantized to Q8_0 by handy-computer. Model weights are CC BY 4.0 and are downloaded separately from https://huggingface.co/handy-computer/canary-180m-flash-gguf . Original: https://huggingface.co/nvidia/canary-180m-flash . Publisher notices, attribution, license and pinned file provenance are in `licenses/canary/` and `desktop/voice_model.py`. The model is data, not executable code. No weights are embedded in the APK or Windows executable.
+
+The Windows notification icon uses pystray 0.19.5 (LGPL-3.0) and six 1.17.0 (MIT). Their distribution licenses are preserved in `licenses/pystray/` and `licenses/six/`. The application sources and rebuild scripts are supplied alongside the binaries.

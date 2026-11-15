@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10191f">
+  <meta name="description" content="Share text, photos, and files between your iPhone and Windows PC over Wi-Fi.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./app.css">
+  <script src="./vendor/jsQR.js" defer></script>
+  <script type="module" src="./app.mjs"></script>
+  <title>ClipBridge</title>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="./icon-192.png" width="52" height="52" alt="">
+      <div><h1>ClipBridge</h1><p>iPhone ↔ Windows</p></div>
+    </header>
+
+    <section id="pairing" aria-labelledby="pair-title">
+      <h2 id="pair-title">Pair with your PC</h2>
+      <p>In ClipBridge on Windows, open <strong>iPhone web pairing</strong> and enable it. Connect both devices to the same Wi-Fi.</p>
+      <div class="actions">
+        <button id="scan" type="button">Scan pairing QR</button>
+        <button id="choose-photo" type="button" class="secondary">Choose QR photo</button>
+        <input id="qr-photo" type="file" accept="image/*" hidden>
+      </div>
+      <div id="camera" hidden>
+        <p>Hold the whole iPhone web pairing code in view.</p>
+        <video id="camera-view" aria-label="QR camera preview" autoplay muted playsinline></video>
+        <button id="stop-scan" type="button" class="secondary">Close camera</button>
+      </div>
+      <details>
+        <summary>Use a pairing link</summary>
+        <form id="pair-form">
+          <label for="pair-link">Web pairing link from your PC</label>
+          <input id="pair-link" type="text" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" required>
+          <button type="submit">Pair</button>
+        </form>
+      </details>
+    </section>
+
+    <div id="transfer" hidden>
+      <div class="pair-status"><span>Paired with your PC</span><button id="forget" type="button" class="quiet">Forget PC</button></div>
+      <section aria-labelledby="send-title">
+        <h2 id="send-title">Send</h2>
+        <label for="draft">Text to send</label>
+        <textarea id="draft" rows="3" placeholder="Type or paste text"></textarea>
+        <div class="actions">
+          <button id="send" type="button">Send to PC</button>
+          <button id="paste" type="button" class="secondary">Paste &amp; send</button>
+        </div>
+        <div class="file-controls">
+          <label for="send-files">Choose files or photos · up to 20 files, 300 MB total</label>
+          <input id="send-files" type="file" multiple>
+          <label for="send-photos">Photo library</label>
+          <input id="send-photos" type="file" accept="image/*" multiple>
+          <p id="selected-files"></p>
+          <button id="send-selected" type="button" class="secondary" disabled>Send selected files</button>
+        </div>
+      </section>
+      <section aria-labelledby="get-title">
+        <h2 id="get-title">Receive</h2>
+        <p>Copy text, an image, or files on Windows, then tap Get from PC. For files selected in the PC app, tap Receive files.</p>
+        <div class="actions">
+          <button id="get" type="button">Get from PC</button>
+          <button id="receive-files" type="button" class="secondary">Receive files</button>
+        </div>
+        <div id="received" hidden>
+          <label for="incoming">Text from your PC</label>
+          <textarea id="incoming" rows="3" readonly></textarea>
+          <button id="copy" type="button" class="secondary">Copy text</button>
+        </div>
+        <div id="received-files" hidden>
+          <p>Save the received files before closing this app.</p>
+          <p>For documents, save to Files to copy and paste them in other apps.</p>
+          <div id="received-list"></div>
+          <button id="share-files" type="button" class="secondary">Save or share files</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="status" role="status" aria-live="polite" hidden></div>
+    <div id="transfer-progress" hidden>
+      <progress id="progress" max="100" value="0" aria-label="Transfer progress"></progress>
+      <button id="cancel-transfer" type="button" class="secondary">Cancel transfer</button>
+    </div>
+
+    <details id="install">
+      <summary>Add ClipBridge to your Home Screen</summary>
+      <p>In Safari, tap <strong>Share</strong> and choose <strong>Add to Home Screen</strong>. Turn on <strong>Open as Web App</strong> if Safari shows the option. Open ClipBridge from the new icon, then scan the PC’s pairing QR there.</p>
+    </details>
+  </main>
+</body>
+</html>
