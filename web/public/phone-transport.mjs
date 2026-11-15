@@ -166,6 +166,12 @@ export class PhoneSession extends EventTarget {
       const wire = new Uint8Array(16 + cipher.length);
       new DataView(wire.buffer).setUint32(0, seq); wire.set(nonce, 4); wire.set(cipher, 16);
       const transport = this.socket || this.channel;
+      if (this.socket) {
+        // Pace encrypted frames within the relay's rate limit, including ACKs.
+        const delay = (this.lastFrameAt || 0) + 16 - performance.now();
+        if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
+        this.lastFrameAt = performance.now();
+      }
       if (transport?.readyState !== (this.socket ? WebSocket.OPEN : 'open')) throw new Error('The other phone is disconnected.');
       transport.send(wire);
     });
@@ -291,14 +297,22 @@ export class PhoneSession extends EventTarget {
       await this.ask({ type: 'offer', id, ...offer }, undefined, signal, 120000);
       if (item.kind === 'files') {
         let done = 0; const total = item.files.reduce((n, f) => n + f.size, 0);
+        const inFlight = [];
         for (let index = 0; index < item.files.length; index++) {
           const file = item.files[index];
           for (let offset = 0; offset < file.size; offset += chunkSize) {
             const bytes = new Uint8Array(await file.slice(offset, offset + chunkSize).arrayBuffer());
-            await this.ask({ type: 'chunk', id, index, offset }, bytes, signal);
-            done += bytes.length; this.emit('progress', { direction: 'send', done, total });
+            const acknowledged = this.ask({ type: 'chunk', id, index, offset }, bytes, signal).then(() => {
+              done += bytes.length;
+              if (this.sending === id && !signal.aborted) this.emit('progress', { direction: 'send', done, total });
+            });
+            // Handle later failures immediately, even while awaiting an older ACK.
+            acknowledged.catch(() => {});
+            inFlight.push(acknowledged);
+            if (inFlight.length >= 8) await inFlight.shift();
           }
         }
+        await Promise.all(inFlight);
         await this.ask({ type: 'finish', id }, undefined, signal);
       }
     } catch (error) {

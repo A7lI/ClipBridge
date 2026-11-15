@@ -1,4 +1,4 @@
-const version = 'clipbridge-mobile-0.6.5-v1';
+const version = 'clipbridge-mobile-0.6.5-v2';
 const assets = ['./', './index.html', './phone.html', './app.css', './app.mjs', './transport.mjs', './files.mjs', './phone-app.mjs', './phone-transport.mjs', './phone-qr.mjs', './offline.mjs', './manifest.webmanifest', './icon-192.png', './icon-512.png', './vendor/jsQR.js', './vendor/qrcode.mjs'];
 self.addEventListener('install', event => event.waitUntil(caches.open(version).then(cache => cache.addAll(assets))));
 self.addEventListener('activate', event => event.waitUntil((async () => {
