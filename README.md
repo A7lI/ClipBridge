@@ -23,7 +23,7 @@ Extract the ZIP and run **ClipBridge-PC.exe**. If an older instance is running, 
 3. Launch ClipBridge from your Home Screen and tap **Scan pairing QR**. Scan the QR shown on Windows.
 4. Use **Send to PC** or **Get from PC**. The latter reads the Windows clipboard when you tap it. It also works for text copied while the web app was closed.
 
-The web preview supports plain text up to 4 KB per transfer. The [SwiftUI source preview](https://github.com/A7lI/ClipBridge/releases/tag/v0.1.0-iphone-preview) is also available for Xcode users.
+The web preview supports plain text up to 4 KB per transfer.
 
 ## Android
 
