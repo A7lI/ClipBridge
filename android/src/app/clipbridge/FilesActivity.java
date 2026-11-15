@@ -14,7 +14,7 @@ public class FilesActivity extends Activity {
     private Uri saving;
     @Override public void onCreate(Bundle state){
         super.onCreate(state);if(state!=null){String value=state.getString("saving");if(value!=null)saving=Uri.parse(value);}
-        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(Ui.dp(this,16),Ui.dp(this,20),Ui.dp(this,16),Ui.dp(this,20));root.setBackgroundColor(MainActivity.BG);scroll.addView(root);
+        ScrollView scroll=new ScrollView(this);scroll.setFitsSystemWindows(true);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(Ui.dp(this,16),Ui.dp(this,20),Ui.dp(this,16),Ui.dp(this,20));root.setBackgroundColor(MainActivity.BG);scroll.addView(root);
         TextView title=new TextView(this);title.setText("Received files");title.setTextSize(23);title.setTextColor(MainActivity.FG);root.addView(title);
         TextView note=new TextView(this);note.setText("Downloads / ClipBridge");note.setTextColor(MainActivity.MUTED);root.addView(note);
         int downloaded=0;
