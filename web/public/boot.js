@@ -12,7 +12,7 @@
   const entry = script.dataset.entry;
   if (!['app.mjs', 'phone-app.mjs'].includes(entry)) return;
   const url = new URL(entry, script.src);
-  url.search = 'build=0.7.0.1';
+  url.search = 'build=0.7.1';
   import(url.href).then(() => {
     clearTimeout(timer);
     controls.disabled = false;

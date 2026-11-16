@@ -1,5 +1,6 @@
 """Disk-backed, bounded file transfers for one authenticated web connection."""
 import io
+import hashlib
 import mimetypes
 import os
 from pathlib import Path
@@ -13,6 +14,7 @@ from file_transfer import RECEIVED
 from protocol import MAX_FILES, MAX_FILE_COUNT, MAX_IMAGE, safe_filename, b64, unb64
 
 WEB_CHUNK = 16 * 1024
+STREAM_BLOCK = 1024 * 1024
 
 
 def file_manifest(paths):
@@ -53,12 +55,16 @@ class WebFiles:
             return self.begin(data)
         if path == '/v2/files/put':
             return self.put(data)
+        if path == '/v2/files/put-stream':
+            return self.put_stream(data)
         if path == '/v2/files/commit':
             return self.commit(data)
         if path == '/v2/files/current':
             return self.current(data)
         if path == '/v2/files/get':
             return self.get(data)
+        if path == '/v2/files/get-stream':
+            return self.get_stream(data)
         if path == '/v2/files/ack':
             task = self.download
             if not task or data.get('id') != task['id']:
@@ -92,7 +98,8 @@ class WebFiles:
             target.touch()
             paths.append(target)
         self.upload = {'id': str(uuid.uuid4()), 'paths': paths, 'sizes': [file['size'] for file in files]}
-        return {'ok': True, 'id': self.upload['id'], 'chunk_size': WEB_CHUNK}
+        return {'ok': True, 'id': self.upload['id'], 'chunk_size': WEB_CHUNK,
+                'stream_version': 1, 'stream_block_size': STREAM_BLOCK}
 
     def put(self, data):
         task = self.upload
@@ -194,7 +201,48 @@ class WebFiles:
             files = file_manifest(sources)
         identity = str(uuid.uuid4())
         self.download = {'id': identity, 'paths': sources, 'outbox': outbox['id'] if outbox else None}
-        return {'ok': True, 'item': {'kind': 'files', 'id': identity, 'files': files, 'chunk_size': WEB_CHUNK}}
+        return {'ok': True, 'item': {'kind': 'files', 'id': identity, 'files': files, 'chunk_size': WEB_CHUNK,
+                                    'stream_version': 1, 'stream_block_size': STREAM_BLOCK}}
+
+    def put_stream(self, data):
+        task = self.upload
+        if not task or data.get('id') != task['id']:
+            raise ValueError('Unknown upload')
+        index, offset, size = data.get('index'), data.get('offset'), data.get('size')
+        if type(index) is not int or not 0 <= index < len(task['paths']):
+            raise ValueError('Invalid file index')
+        target = task['paths'][index]
+        if type(offset) is not int or offset != target.stat().st_size:
+            raise ValueError('Invalid file offset')
+        raw = data.get('_binary')
+        if (type(size) is not int or not 1 <= size <= STREAM_BLOCK or not isinstance(raw, bytes)
+                or len(raw) != size or offset + size > task['sizes'][index]):
+            raise ValueError('Invalid stream size')
+        # The digest is inside the authenticated command. Verify before writing.
+        if hashlib.sha256(raw).hexdigest() != data.get('sha256'):
+            raise ValueError('File integrity check failed')
+        with target.open('ab') as output:
+            output.write(raw)
+        return {'ok': True}
+
+    def get_stream(self, data):
+        task = self.download
+        if not task or data.get('id') != task['id']:
+            raise ValueError('Unknown download')
+        index, offset, size = data.get('index'), data.get('offset'), data.get('size')
+        if (type(index) is not int or not 0 <= index < len(task['paths'])
+                or type(offset) is not int or offset < 0 or type(size) is not int
+                or not 1 <= size <= STREAM_BLOCK):
+            raise ValueError('Invalid file position')
+        target = task['paths'][index]
+        if offset + size > target.stat().st_size:
+            raise ValueError('Invalid stream size')
+        with target.open('rb') as source:
+            source.seek(offset)
+            raw = source.read(size)
+        if len(raw) != size:
+            raise ValueError('Incomplete file received')
+        return {'ok': True, 'size': size, 'sha256': hashlib.sha256(raw).hexdigest(), '_binary': raw}
 
     def get(self, data):
         task = self.download

@@ -1,14 +1,19 @@
-# ClipBridge 0.7
+# ClipBridge 0.7.1
 
 Across your devices. Share text, photos and files between phones and Windows.
 
 | Device | Get it |
 | --- | --- |
-| Windows x64 | [Download 0.7.0 ZIP](https://github.com/A7lI/ClipBridge/releases/download/v0.7.0-preview/ClipBridge-Windows-0.7.0-preview.zip) |
-| Android 11+ | [Download 0.7.0 APK](https://github.com/A7lI/ClipBridge/releases/download/v0.7.0-preview/ClipBridge-Android-0.7.0.apk) |
+| Windows x64 | [Download 0.7.1 ZIP](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ClipBridge-Windows-0.7.1-preview.zip) |
+| Android 11+ | [Download 0.7.1 APK](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ClipBridge-Android-0.7.1.apk) |
 | iPhone | [Open the web app](https://www.a7li.dev/apps/clipbridge/web/) · Safari → Add to Home Screen |
 
-[Website](https://www.a7li.dev/apps/clipbridge/) · [Release notes and checksums](https://github.com/A7lI/ClipBridge/releases/tag/v0.7.0-preview)
+[Website](https://www.a7li.dev/apps/clipbridge/) · [Release notes and checksums](https://github.com/A7lI/ClipBridge/releases/tag/v0.7.1-preview)
+
+## Faster transfers, fewer buttons
+
+- iPhone–PC transfers use buffered binary blocks with Windows 0.7.1. Older Windows builds remain compatible using the original transfer method.
+- Android: **Take & send photo** captures a photo; **Connect → Scan pairing code** connects your PC. The duplicate scanner on Share is removed.
 
 ## A simpler design
 
@@ -34,11 +39,11 @@ Across your devices. Share text, photos and files between phones and Windows.
 
 PC and Nearby transfers are encrypted local connections. Online phone sharing uses an encrypted Cloudflare relay without server file storage and is subject to its free quotas. Keep pairing links private. There is no background phone delivery queue.
 
-Android 0.7.0 uses the same signing certificate as 0.6.2 and 0.6.5: install over those versions to keep settings. Extract the Windows ZIP and quit the old tray instance before opening the new build.
+Android 0.7.1 uses the same signing certificate as 0.6.2 and 0.6.5: install over those versions to keep settings. Extract the Windows ZIP and quit the old tray instance before opening the new build.
 
 ## Source and testing
 
-Source, build scripts, notices and checksums are included in the release. Third-party licenses are in `licenses/`, `android/assets/suggestions/`, and `web/public/vendor/`. Windows includes FFmpeg under LGPL v3 or later; its [corresponding source](https://github.com/A7lI/ClipBridge/releases/download/v0.7.0-preview/ffmpeg-9.0.2.tar.xz) is attached.
+Source, build scripts, notices and checksums are included in the release. Third-party licenses are in `licenses/`, `android/assets/suggestions/`, and `web/public/vendor/`. Windows includes FFmpeg under LGPL v3 or later; its [corresponding source](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ffmpeg-9.0.2.tar.xz) is attached.
 
 Transfer, encryption, startup, keyboard, QR and build checks pass. The Windows interface was visually reviewed; web layouts were checked at phone and desktop widths. Physical Android/iPhone testing remains pending. The archived SwiftUI prototype was restyled in source only; the supported iPhone distribution is the web app.
 

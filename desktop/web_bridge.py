@@ -11,7 +11,7 @@ from websockets.asyncio.client import connect
 from websockets.exceptions import WebSocketException
 
 from protocol import Protocol, b64
-from web_files import WebFiles, file_manifest
+from web_files import WebFiles, file_manifest, WEB_CHUNK, STREAM_BLOCK
 import uuid
 
 
@@ -20,7 +20,8 @@ MAX_MESSAGE = 49152
 MAX_PEERS = 4
 PEER_ID = re.compile(r'[a-f0-9]{32}\Z')
 PATHS = {'/v1/pair', '/v1/clipboard', '/v1/clipboard/current'}
-FILE_PATHS = {'/v2/files/begin', '/v2/files/put', '/v2/files/commit', '/v2/files/current', '/v2/files/get', '/v2/files/ack'}
+FILE_PATHS = {'/v2/files/begin', '/v2/files/put', '/v2/files/commit', '/v2/files/current', '/v2/files/get', '/v2/files/ack',
+              '/v2/files/put-stream', '/v2/files/get-stream'}
 
 
 def web_urls(base, key):
@@ -60,7 +61,7 @@ class WebBridge:
         self.state = state
         self.clipboard = clipboard
         self.outbox = None
-        self.status = 'Connecting to the web app…'
+        self.status = 'Connecting to the web appâ€¦'
         self.stop = threading.Event()
         self.loop = None
         self.task = None
@@ -94,7 +95,7 @@ class WebBridge:
             if self.stop.is_set() or self.state.paused:
                 raise ValueError('Enable web pairing and start syncing first')
             self.outbox = {'id': str(uuid.uuid4()), 'paths': list(paths)}
-            self.status = f'{len(files)} files ready · tap Receive files on the phone'
+            self.status = f'{len(files)} files ready Â· tap Receive files on the phone'
 
     async def listen(self):
         while not self.stop.is_set():
@@ -102,7 +103,7 @@ class WebBridge:
             try:
                 async with connect(self.socket_url, open_timeout=8, close_timeout=1, max_size=MAX_MESSAGE,
                                    compression=None, proxy=None, ping_interval=None) as socket:
-                    self.status = 'Ready to pair · use the same Wi-Fi'
+                    self.status = 'Ready to pair Â· use the same Wi-Fi'
                     async for raw in socket:
                         if self.stop.is_set():
                             break
@@ -121,7 +122,7 @@ class WebBridge:
                         peers[identity] = task
                         task.add_done_callback(lambda _, peer=identity: peers.pop(peer, None))
             except (OSError, TimeoutError, WebSocketException):
-                self.status = 'Web app unavailable · reconnecting…'
+                self.status = 'Web app unavailable Â· reconnectingâ€¦'
             finally:
                 remaining = list(peers.values())
                 for task in remaining:
@@ -134,6 +135,8 @@ class WebBridge:
         peer = RTCPeerConnection(RTCConfiguration(iceServers=[]))
         closed = asyncio.Event()
         pending = None
+        inbox = asyncio.Queue(maxsize=128)
+        queued_bytes = 0
         files = WebFiles(self)
 
         @peer.on('connectionstatechange')
@@ -154,9 +157,34 @@ class WebBridge:
 
             @channel.on('message')
             def received(message):
-                nonlocal pending
-                if pending is None or pending.done():
-                    pending = asyncio.create_task(self.handle(channel, identity, message, files))
+                nonlocal queued_bytes
+                limit = WEB_CHUNK if isinstance(message, bytes) else MAX_MESSAGE
+                if (not isinstance(message, (str, bytes)) or len(message) > limit
+                        or inbox.full() or queued_bytes + len(message) > 2 * STREAM_BLOCK):
+                    channel.close()
+                    closed.set()
+                    return
+                queued_bytes += len(message)
+                inbox.put_nowait(message)
+
+            async def next_message():
+                nonlocal queued_bytes
+                message = await asyncio.wait_for(inbox.get(), timeout=30)
+                queued_bytes -= len(message)
+                return message
+
+            async def consume():
+                try:
+                    while not closed.is_set():
+                        message = await next_message()
+                        if not isinstance(message, str):
+                            raise ValueError('Unexpected file data')
+                        await self.handle(channel, identity, message, files, next_message)
+                except (OSError, ValueError, TimeoutError):
+                    channel.close()
+                    closed.set()
+
+            pending = asyncio.create_task(consume())
 
         try:
             async with asyncio.timeout(900):
@@ -170,15 +198,19 @@ class WebBridge:
                 await socket.send(json.dumps({'peer': identity, 'signal': json.loads(answer)}))
                 await closed.wait()
         except Exception as error:
-            self.status = f'Web transfer ended ({type(error).__name__}) · retry from the phone'
+            self.status = f'Web transfer ended ({type(error).__name__}) Â· retry from the phone'
         finally:
+            closed.set()
             if pending:
                 # A running disk/clipboard operation must finish before temp cleanup.
+                # Wake a consumer waiting for the next command on peer shutdown.
+                if not inbox.full():
+                    inbox.put_nowait('')
                 await asyncio.gather(pending, return_exceptions=True)
             await peer.close()
             files.close()
 
-    async def handle(self, channel, identity, message, files):
+    async def handle(self, channel, identity, message, files, next_message=None):
         try:
             if self.stop.is_set() or not isinstance(message, str) or len(message) > MAX_MESSAGE:
                 return
@@ -191,13 +223,35 @@ class WebBridge:
         except Exception:
             return
         try:
+            if path == '/v2/files/put-stream':
+                size = data.get('size')
+                if type(size) is not int or not 1 <= size <= STREAM_BLOCK or next_message is None:
+                    raise ValueError('Invalid stream size')
+                parts, received = [], 0
+                while received < size:
+                    frame = await next_message()
+                    if not isinstance(frame, bytes) or not 1 <= len(frame) <= min(WEB_CHUNK, size - received):
+                        raise ValueError('Invalid stream frame')
+                    parts.append(frame)
+                    received += len(frame)
+                data['_binary'] = b''.join(parts)
             result = await asyncio.to_thread(self.dispatch, path, data, files)
         except (OSError, ValueError) as error:
             result = {'ok': False, 'error': str(error)[:200]}
         except Exception:
             result = {'ok': False, 'error': 'The PC could not access the clipboard.'}
         if channel.readyState == 'open':
+            binary = result.pop('_binary', None)
             channel.send(self.protocol.seal(context, nonce, result).decode('ascii'))
+            if binary:
+                for offset in range(0, len(binary), WEB_CHUNK):
+                    while channel.bufferedAmount > 256 * 1024:
+                        if channel.readyState != 'open' or self.stop.is_set():
+                            return
+                        await asyncio.sleep(.002)
+                    if channel.readyState != 'open':
+                        return
+                    channel.send(binary[offset:offset + WEB_CHUNK])
 
     def dispatch(self, path, data, files=None):
         with self.state.changed:

@@ -1,5 +1,6 @@
 from pathlib import Path
 import secrets
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -7,7 +8,7 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'desktop'))
 from protocol import MAX_FILES, b64, unb64
-from web_files import WebFiles, WEB_CHUNK, file_manifest
+from web_files import WebFiles, WEB_CHUNK, STREAM_BLOCK, file_manifest
 
 
 class WebFilesTests(unittest.TestCase):
@@ -87,6 +88,40 @@ class WebFilesTests(unittest.TestCase):
         self.assertEqual(file_manifest([source])[0]['size'],MAX_FILES)
         with self.assertRaisesRegex(ValueError,'300 MB'):
             file_manifest([source,source])
+
+    def test_stream_blocks_verify_before_writing_and_keep_legacy_compatible(self):
+        raw = secrets.token_bytes(STREAM_BLOCK + 17)
+        begin = self.files.begin({'files': [dict(name='stream.bin', size=len(raw))]})
+        self.assertEqual(begin['chunk_size'], WEB_CHUNK)
+        self.assertEqual(begin['stream_version'], 1)
+        self.assertEqual(begin['stream_block_size'], STREAM_BLOCK)
+        request = dict(id=begin['id'], index=0, offset=0, size=STREAM_BLOCK,
+                       _binary=raw[:STREAM_BLOCK], sha256='wrong')
+        with self.assertRaisesRegex(ValueError, 'integrity'):
+            self.files.dispatch('/v2/files/put-stream', request)
+        self.assertEqual(self.files.upload['paths'][0].stat().st_size, 0)
+        request['sha256'] = hashlib.sha256(request['_binary']).hexdigest()
+        self.files.dispatch('/v2/files/put-stream', request)
+        with self.assertRaisesRegex(ValueError, 'offset'):
+            self.files.dispatch('/v2/files/put-stream', request)
+        # Mixing an existing chunk client with the new capability stays valid.
+        self.files.put(dict(id=begin['id'], index=0, offset=STREAM_BLOCK, data=b64(raw[STREAM_BLOCK:])))
+        self.files.commit({'id': begin['id']})
+        paths = self.bridge.clipboard.write_paths.call_args.args[0]
+        self.assertEqual(Path(paths[0]).read_bytes(), raw)
+        self.bridge.clipboard.read_paths.return_value = paths
+        info = self.files.current({})['item']
+        result = self.files.dispatch('/v2/files/get-stream', dict(id=info['id'], index=0, offset=0, size=STREAM_BLOCK))
+        self.assertEqual(result['_binary'], raw[:STREAM_BLOCK])
+        self.assertEqual(result['sha256'], hashlib.sha256(result['_binary']).hexdigest())
+        for size in (0, STREAM_BLOCK + 1, True):
+            with self.assertRaises(ValueError):
+                self.files.dispatch('/v2/files/get-stream', dict(id=info['id'], index=0, offset=0, size=size))
+        with self.assertRaises(ValueError):
+            self.files.dispatch('/v2/files/get-stream', dict(id=info['id'], index=0, offset=len(raw), size=1))
+        self.bridge.state.paused = True
+        with self.assertRaisesRegex(ValueError, 'paused'):
+            self.files.dispatch('/v2/files/get-stream', dict(id=info['id'], index=0, offset=0, size=1))
 
 
 if __name__ == '__main__':

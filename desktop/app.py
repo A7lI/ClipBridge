@@ -172,7 +172,7 @@ class App:
             tk.Label(header, image=self.logo_image, bg=BG).pack(side='left', padx=(0, 9))
             root.iconphoto(True, self.logo_image)
         self.label(header, 'ClipBridge.', 22).pack(side='left')
-        self.label(header, '0.7.0', 10, MUTED).pack(side='right')
+        self.label(header, '0.7.1', 10, MUTED).pack(side='right')
         self.connection = self.label(root, 'Connect your phone to get started', 10, MUTED)
         self.connection.pack(anchor='w', padx=24, pady=(0, 12))
         navigation = tk.Frame(root, bg='#12111d', padx=4, pady=4)

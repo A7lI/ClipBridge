@@ -2,6 +2,8 @@
 
 Pair with Windows by QR, then send text, photos, and files in either direction on the same Wi-Fi. Photos and files share a 300 MB total limit per batch of up to 20 files. Text supports up to 4 KB per transfer. Tap **Get from PC** to read the current Windows clipboard, including items copied while ClipBridge was closed on the iPhone.
 
+Windows 0.7.1 and the updated web app negotiate binary file transfers: 16 KB frames are buffered into blocks of up to 1 MB, with an authenticated SHA-256 digest per block. File data stays on the encrypted direct WebRTC connection; Cloudflare handles setup only. Older Windows/web versions retain the 16 KB request/reply method. The batch limit remains 300 MB.
+
 ## Run locally on Windows
 
 Requires Python with `desktop/requirements.txt` installed and a recent Node.js. From the ClipBridge folder, start the website and signaling Worker without deploying them:
@@ -37,9 +39,9 @@ Keep the web app open during a transfer. Cancelled or disconnected uploads remov
 
 The app uses [jsQR 1.4.0](https://www.npmjs.com/package/jsqr) to decode camera frames and photos on the phone. The bundled script is the upstream `dist/jsQR.js` minified with Terser 5.51.2. The Apache 2.0 license is included in `public/vendor/jsQR-LICENSE.txt`.
 
-## Phone-to-phone sharing (Android 0.6.5 / mobile web)
+## Phone-to-phone sharing
 
-Open **Phone-to-phone sharing** in Android or use [the phone sharing screen](https://www.a7li.dev/apps/clipbridge/web/phone) on iPhone. Supports Android ↔ iPhone and phones of the same type, with no PC. Windows remains version 0.6.4.
+Open **Phone-to-phone sharing** in Android or use [the phone sharing screen](https://www.a7li.dev/apps/clipbridge/web/phone) on iPhone. Supports Android ↔ iPhone and phones of the same type, with no PC. The current Windows and Android download is 0.7.1.
 
 - **Online:** both phones need internet, including different Wi-Fi/mobile networks. One creates an invitation; the other scans its QR or opens the private link. Check the six-digit code on both screens. Transfers use AES-256-GCM with direction/sequence authentication. Cloudflare forwards bounded encrypted WebSocket frames without persisting transfer data.
 - **Offline nearby:** open the screen online once on each phone and wait for **Ready for offline nearby sharing**. Join the same Wi-Fi/hotspot; internet is unnecessary. The first phone creates an offline invitation, the second scans it and shows a return QR, and the first scans that return QR. WebRTC uses local candidates with no STUN/TURN or internet signaling. The service worker caches app files only. Guest-network isolation can block a direct connection.
