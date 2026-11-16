@@ -4,7 +4,7 @@ Across your devices. Share text, photos and files between phones and Windows.
 
 | Device | Get it |
 | --- | --- |
-| Windows x64 | [Download 0.7.1 ZIP](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ClipBridge-Windows-0.7.1-preview.zip) |
+| Windows x64 | [Install 0.7.1 EXE](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ClipBridge-Setup-0.7.1.exe) · [Full portable ZIP](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ClipBridge-Windows-0.7.1-preview.zip) |
 | Android 11+ | [Download 0.7.1 APK](https://github.com/A7lI/ClipBridge/releases/download/v0.7.1-preview/ClipBridge-Android-0.7.1.apk) |
 | iPhone | [Open the web app](https://www.a7li.dev/apps/clipbridge/web/) · Safari → Add to Home Screen |
 
@@ -39,7 +39,7 @@ Across your devices. Share text, photos and files between phones and Windows.
 
 PC and Nearby transfers are encrypted local connections. Online phone sharing uses an encrypted Cloudflare relay without server file storage and is subject to its free quotas. Keep pairing links private. There is no background phone delivery queue.
 
-Android 0.7.1 uses the same signing certificate as 0.6.2 and 0.6.5: install over those versions to keep settings. Extract the Windows ZIP and quit the old tray instance before opening the new build.
+Android 0.7.1 uses the same signing certificate as 0.6.2 and 0.6.5: install over those versions to keep settings. Run the Windows installer for an app in Start, or extract the portable ZIP. Quit the old tray instance before opening the new build.
 
 ## Source and testing
 
@@ -47,4 +47,4 @@ Source, build scripts, notices and checksums are included in the release. Third-
 
 Transfer, encryption, startup, keyboard, QR and build checks pass. The Windows interface was visually reviewed; web layouts were checked at phone and desktop widths. Physical Android/iPhone testing remains pending. The archived SwiftUI prototype was restyled in source only; the supported iPhone distribution is the web app.
 
-[Detailed web setup](web/README.md) · [Technical reference](docs/REFERENCE.md) · [Report an issue](https://github.com/A7lI/ClipBridge/issues)
+[Windows installer details](INSTALLER.md) · [Detailed web setup](web/README.md) · [Technical reference](docs/REFERENCE.md) · [Report an issue](https://github.com/A7lI/ClipBridge/issues)
